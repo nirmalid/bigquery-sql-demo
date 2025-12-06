@@ -10,17 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Set up gcloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_KEY }}
+
+      - name: Set up gcloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_KEY }}
           project_id: iconic-biplane-428809-m7
+          install_components: bq
 
       - name: Run SQL files
         run: |
           for file in sql/*.sql; do
             echo "Running $file"
-            bq query --use_legacy_sql=false < "$file"
+            bq query --quiet --use_legacy_sql=false < "$file"
           done
+
