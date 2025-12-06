@@ -1,0 +1,26 @@
+name: Deploy to BigQuery
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-sql:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_KEY }}
+          project_id: iconic-biplane-428809-m7
+
+      - name: Run SQL files
+        run: |
+          for file in sql/*.sql; do
+            echo "Running $file"
+            bq query --use_legacy_sql=false < "$file"
+          done
